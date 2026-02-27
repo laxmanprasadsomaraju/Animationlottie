@@ -66,7 +66,7 @@ export const SettingsModal = ({
           </button>
         </div>
 
-        {/* API Key */}
+        {/* API Keys Section */}
         <div style={{ marginBottom: "20px" }}>
           <label
             style={{
@@ -80,37 +80,84 @@ export const SettingsModal = ({
             }}
           >
             <Key size={14} />
-            API Key
+            API Keys
           </label>
-          <p style={{ fontSize: "11px", color: "#64748b", margin: "0 0 8px 0" }}>
-            Optional. Leave empty to use the default Emergent key. Add your own key for unlimited usage.
+          <p style={{ fontSize: "11px", color: "#64748b", margin: "0 0 12px 0" }}>
+            Optional. Leave empty to use the default Emergent key. Add your own keys for unlimited usage.
           </p>
-          <div style={{ display: "flex", gap: "8px" }}>
-            <input
-              type={showKey ? "text" : "password"}
-              value={localKey}
-              onChange={(e) => setLocalKey(e.target.value)}
-              placeholder="sk-..."
-              style={{
-                flex: 1,
-                background: "#020617",
-                border: "1px solid #1e293b",
-                borderRadius: "6px",
-                padding: "8px 12px",
-                fontSize: "13px",
-                color: "#e2e8f0",
-                fontFamily: "'JetBrains Mono', monospace",
-                outline: "none",
-              }}
-              data-testid="api-key-input"
-            />
-            <button
-              className="lf-btn-secondary"
-              onClick={() => setShowKey(!showKey)}
-              style={{ fontSize: "11px", padding: "8px 12px" }}
-            >
-              {showKey ? "Hide" : "Show"}
-            </button>
+          
+          {/* Individual Provider API Keys */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+            {PROVIDERS.map((p) => (
+              <div key={p.id} style={{ 
+                background: "#0f172a", 
+                borderRadius: "8px", 
+                padding: "12px",
+                border: provider === p.id ? `1px solid ${p.color}` : "1px solid #1e293b",
+                transition: "border-color 0.2s"
+              }}>
+                <div style={{ 
+                  display: "flex", 
+                  alignItems: "center", 
+                  justifyContent: "space-between",
+                  marginBottom: "8px"
+                }}>
+                  <span style={{ 
+                    fontSize: "12px", 
+                    fontWeight: 600, 
+                    color: p.color,
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "6px"
+                  }}>
+                    {p.name}
+                    {localKeys[p.id] && (
+                      <Check size={12} style={{ color: "#10b981" }} />
+                    )}
+                  </span>
+                  {provider === p.id && (
+                    <span style={{ 
+                      fontSize: "9px", 
+                      background: p.color, 
+                      color: "#000",
+                      padding: "2px 6px",
+                      borderRadius: "4px",
+                      fontWeight: 600
+                    }}>
+                      ACTIVE
+                    </span>
+                  )}
+                </div>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input
+                    type={showKeys[p.id] ? "text" : "password"}
+                    value={localKeys[p.id] || ''}
+                    onChange={(e) => handleKeyChange(p.id, e.target.value)}
+                    placeholder={p.placeholder}
+                    style={{
+                      flex: 1,
+                      background: "#020617",
+                      border: "1px solid #1e293b",
+                      borderRadius: "6px",
+                      padding: "8px 12px",
+                      fontSize: "12px",
+                      color: "#e2e8f0",
+                      fontFamily: "'JetBrains Mono', monospace",
+                      outline: "none",
+                    }}
+                    data-testid={`api-key-input-${p.id}`}
+                  />
+                  <button
+                    className="lf-btn-ghost"
+                    onClick={() => toggleShowKey(p.id)}
+                    style={{ padding: "8px", minWidth: "36px" }}
+                    title={showKeys[p.id] ? "Hide" : "Show"}
+                  >
+                    {showKeys[p.id] ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
