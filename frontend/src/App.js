@@ -138,10 +138,10 @@ function App() {
       </div>
       {showSettings && (
         <SettingsModal
-          apiKey={apiKey}
+          apiKeys={apiKeys}
           provider={provider}
           model={model}
-          onApiKeyChange={setApiKey}
+          onApiKeysChange={setApiKeys}
           onProviderChange={setProvider}
           onModelChange={setModel}
           onClose={() => setShowSettings(false)}
