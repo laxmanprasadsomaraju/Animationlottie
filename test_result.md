@@ -101,3 +101,85 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "LottieFlow Studio - AI-powered Lottie animation generator with provider-specific API keys"
+
+backend:
+  - task: "Generate Animation API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "POST /api/generate endpoint accepts provider-specific api_key. Uses EMERGENT_LLM_KEY as fallback."
+
+  - task: "Enhance Animation API"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "POST /api/enhance endpoint accepts provider-specific api_key."
+
+  - task: "History Management APIs"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "POST/GET/DELETE /api/history endpoints for saving animations"
+
+frontend:
+  - task: "Provider-specific API Keys Settings"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/components/SettingsModal.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Updated SettingsModal to support separate API key inputs for OpenAI, Anthropic, and Google Gemini"
+
+  - task: "API Keys State Management"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Changed from single apiKey to apiKeys object. API calls now use provider-specific key."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.0"
+  test_sequence: 1
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Generate Animation API"
+    - "Enhance Animation API"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implemented provider-specific API keys feature. Each provider (OpenAI, Anthropic, Gemini) now has its own API key input field. When making API calls, the correct key is selected based on the active provider."
