@@ -1,28 +1,36 @@
 import { useState } from "react";
-import { X, Key, ChevronDown } from "lucide-react";
+import { X, Key, ChevronDown, Eye, EyeOff, Check } from "lucide-react";
 
 const PROVIDERS = [
-  { id: "openai", name: "OpenAI", models: ["gpt-5.2", "gpt-5.1", "gpt-4.1", "gpt-4o"] },
-  { id: "anthropic", name: "Anthropic", models: ["claude-4-sonnet-20250514", "claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"] },
-  { id: "gemini", name: "Google Gemini", models: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-3-flash-preview"] },
+  { id: "openai", name: "OpenAI", models: ["gpt-5.2", "gpt-5.1", "gpt-4.1", "gpt-4o"], placeholder: "sk-...", color: "#10b981" },
+  { id: "anthropic", name: "Anthropic", models: ["claude-4-sonnet-20250514", "claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"], placeholder: "sk-ant-...", color: "#f59e0b" },
+  { id: "gemini", name: "Google Gemini", models: ["gemini-2.5-pro", "gemini-2.5-flash", "gemini-3-flash-preview"], placeholder: "AIza...", color: "#3b82f6" },
 ];
 
 export const SettingsModal = ({
-  apiKey,
+  apiKeys,
   provider,
   model,
-  onApiKeyChange,
+  onApiKeysChange,
   onProviderChange,
   onModelChange,
   onClose,
 }) => {
-  const [localKey, setLocalKey] = useState(apiKey);
-  const [showKey, setShowKey] = useState(false);
+  const [localKeys, setLocalKeys] = useState(apiKeys || { openai: '', anthropic: '', gemini: '' });
+  const [showKeys, setShowKeys] = useState({ openai: false, anthropic: false, gemini: false });
   const selectedProvider = PROVIDERS.find((p) => p.id === provider) || PROVIDERS[0];
 
   const handleSave = () => {
-    onApiKeyChange(localKey);
+    onApiKeysChange(localKeys);
     onClose();
+  };
+
+  const handleKeyChange = (providerId, value) => {
+    setLocalKeys(prev => ({ ...prev, [providerId]: value }));
+  };
+
+  const toggleShowKey = (providerId) => {
+    setShowKeys(prev => ({ ...prev, [providerId]: !prev[providerId] }));
   };
 
   const handleProviderChange = (newProvider) => {
