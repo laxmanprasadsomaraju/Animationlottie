@@ -62,10 +62,11 @@ function App() {
     }
     setIsEnhancing(true);
     try {
+      const currentApiKey = apiKeys[provider] || undefined;
       const res = await axios.post(`${API}/enhance`, {
         lottie_json: lottieJson,
         prompt: enhancePrompt.trim(),
-        api_key: apiKey || undefined,
+        api_key: currentApiKey,
         provider,
         model,
       });
@@ -79,7 +80,7 @@ function App() {
     } finally {
       setIsEnhancing(false);
     }
-  }, [lottieJson, apiKey, provider, model]);
+  }, [lottieJson, apiKeys, provider, model]);
 
   const handleLoadTemplate = useCallback((template) => {
     setLottieJson(template.lottie_json);
