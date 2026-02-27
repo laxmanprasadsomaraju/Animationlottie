@@ -18,7 +18,7 @@ function App() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [showDownload, setShowDownload] = useState(false);
-  const [apiKey, setApiKey] = useState("");
+  const [apiKeys, setApiKeys] = useState({ openai: '', anthropic: '', gemini: '' });
   const [provider, setProvider] = useState("openai");
   const [model, setModel] = useState("gpt-5.2");
   const [animationName, setAnimationName] = useState("My Animation");
