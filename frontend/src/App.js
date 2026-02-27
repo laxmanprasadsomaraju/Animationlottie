@@ -1,52 +1,157 @@
-import { useEffect } from "react";
+import { useState, useCallback } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { Toaster, toast } from "sonner";
+import { Toolbar } from "@/components/Toolbar";
+import { PromptPanel } from "@/components/PromptPanel";
+import { PreviewPanel } from "@/components/PreviewPanel";
+import { SettingsModal } from "@/components/SettingsModal";
+import { DownloadModal } from "@/components/DownloadModal";
 import axios from "axios";
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
 
-const Home = () => {
-  const helloWorldApi = async () => {
-    try {
-      const response = await axios.get(`${API}/`);
-      console.log(response.data.message);
-    } catch (e) {
-      console.error(e, `errored out requesting / api`);
-    }
-  };
+function App() {
+  const [lottieJson, setLottieJson] = useState(null);
+  const [currentPrompt, setCurrentPrompt] = useState("");
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showDownload, setShowDownload] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [provider, setProvider] = useState("openai");
+  const [model, setModel] = useState("gpt-5.2");
+  const [animationName, setAnimationName] = useState("My Animation");
 
-  useEffect(() => {
-    helloWorldApi();
+  const handleGenerate = useCallback(async (prompt) => {
+    if (!prompt.trim()) {
+      toast.error("Please enter a prompt");
+      return;
+    }
+    setIsGenerating(true);
+    setCurrentPrompt(prompt);
+    try {
+      const res = await axios.post(`${API}/generate`, {
+        prompt: prompt.trim(),
+        api_key: apiKey || undefined,
+        provider,
+        model,
+      });
+      if (res.data.success) {
+        setLottieJson(res.data.lottie_json);
+        setAnimationName(prompt.slice(0, 40));
+        toast.success("Animation generated!");
+      }
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Generation failed";
+      toast.error(msg);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [apiKey, provider, model]);
+
+  const handleEnhance = useCallback(async (enhancePrompt) => {
+    if (!lottieJson) {
+      toast.error("Generate an animation first");
+      return;
+    }
+    if (!enhancePrompt.trim()) {
+      toast.error("Enter enhancement details");
+      return;
+    }
+    setIsEnhancing(true);
+    try {
+      const res = await axios.post(`${API}/enhance`, {
+        lottie_json: lottieJson,
+        prompt: enhancePrompt.trim(),
+        api_key: apiKey || undefined,
+        provider,
+        model,
+      });
+      if (res.data.success) {
+        setLottieJson(res.data.lottie_json);
+        toast.success("Animation enhanced!");
+      }
+    } catch (err) {
+      const msg = err.response?.data?.detail || "Enhancement failed";
+      toast.error(msg);
+    } finally {
+      setIsEnhancing(false);
+    }
+  }, [lottieJson, apiKey, provider, model]);
+
+  const handleLoadTemplate = useCallback((template) => {
+    setLottieJson(template.lottie_json);
+    setAnimationName(template.name);
+    setCurrentPrompt(template.description);
+    toast.success(`Loaded template: ${template.name}`);
+  }, []);
+
+  const handleSave = useCallback(async () => {
+    if (!lottieJson) return;
+    try {
+      await axios.post(`${API}/history`, {
+        name: animationName,
+        prompt: currentPrompt,
+        lottie_json: lottieJson,
+      });
+      toast.success("Animation saved!");
+    } catch {
+      toast.error("Failed to save");
+    }
+  }, [lottieJson, animationName, currentPrompt]);
+
+  const handleJsonEdit = useCallback((newJson) => {
+    setLottieJson(newJson);
   }, []);
 
   return (
-    <div>
-      <header className="App-header">
-        <a
-          className="App-link"
-          href="https://emergent.sh"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <img src="https://avatars.githubusercontent.com/in/1201222?s=120&u=2686cf91179bbafbc7a71bfbc43004cf9ae1acea&v=4" />
-        </a>
-        <p className="mt-5">Building something incredible ~!</p>
-      </header>
-    </div>
-  );
-};
-
-function App() {
-  return (
-    <div className="App">
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Home />}>
-            <Route index element={<Home />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+    <div data-testid="app-root" style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: { background: "#1e293b", color: "#f8fafc", border: "1px solid #334155" },
+        }}
+      />
+      <Toolbar
+        onSettings={() => setShowSettings(true)}
+        onDownload={() => setShowDownload(true)}
+        onSave={handleSave}
+        hasAnimation={!!lottieJson}
+      />
+      <div className="lf-studio">
+        <PromptPanel
+          onGenerate={handleGenerate}
+          onEnhance={handleEnhance}
+          onLoadTemplate={handleLoadTemplate}
+          isGenerating={isGenerating}
+          isEnhancing={isEnhancing}
+          currentPrompt={currentPrompt}
+        />
+        <PreviewPanel
+          lottieJson={lottieJson}
+          onJsonEdit={handleJsonEdit}
+          animationName={animationName}
+        />
+      </div>
+      {showSettings && (
+        <SettingsModal
+          apiKey={apiKey}
+          provider={provider}
+          model={model}
+          onApiKeyChange={setApiKey}
+          onProviderChange={setProvider}
+          onModelChange={setModel}
+          onClose={() => setShowSettings(false)}
+        />
+      )}
+      {showDownload && lottieJson && (
+        <DownloadModal
+          lottieJson={lottieJson}
+          animationName={animationName}
+          onClose={() => setShowDownload(false)}
+        />
+      )}
     </div>
   );
 }
