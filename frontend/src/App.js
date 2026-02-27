@@ -31,9 +31,10 @@ function App() {
     setIsGenerating(true);
     setCurrentPrompt(prompt);
     try {
+      const currentApiKey = apiKeys[provider] || undefined;
       const res = await axios.post(`${API}/generate`, {
         prompt: prompt.trim(),
-        api_key: apiKey || undefined,
+        api_key: currentApiKey,
         provider,
         model,
       });
@@ -48,7 +49,7 @@ function App() {
     } finally {
       setIsGenerating(false);
     }
-  }, [apiKey, provider, model]);
+  }, [apiKeys, provider, model]);
 
   const handleEnhance = useCallback(async (enhancePrompt) => {
     if (!lottieJson) {
