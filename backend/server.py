@@ -216,7 +216,10 @@ async def generate_animation(req: GenerateRequest):
         raise
     except Exception as e:
         logger.error(f"Generation error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Animation generation failed: {str(e)}")
+        err_msg = str(e)
+        if "Budget has been exceeded" in err_msg or "budget" in err_msg.lower():
+            raise HTTPException(status_code=402, detail="API key budget exceeded. Please add balance to your Universal Key (Profile > Universal Key > Add Balance) or add your own API key in Settings.")
+        raise HTTPException(status_code=500, detail=f"Animation generation failed: {err_msg}")
 
 
 @api_router.post("/enhance")
@@ -246,7 +249,10 @@ async def enhance_animation(req: EnhanceRequest):
         raise
     except Exception as e:
         logger.error(f"Enhancement error: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Animation enhancement failed: {str(e)}")
+        err_msg = str(e)
+        if "Budget has been exceeded" in err_msg or "budget" in err_msg.lower():
+            raise HTTPException(status_code=402, detail="API key budget exceeded. Please add balance to your Universal Key (Profile > Universal Key > Add Balance) or add your own API key in Settings.")
+        raise HTTPException(status_code=500, detail=f"Animation enhancement failed: {err_msg}")
 
 
 @api_router.post("/history")
